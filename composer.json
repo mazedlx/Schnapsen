@@ -1,0 +1,10 @@
+{
+    "autoload": {
+        "psr-4": {
+            "Schnapsen\\": "src/Schnapsen"
+        }
+    },
+    "require": {
+        "larapack/dd": "^1.1"
+    }
+}
