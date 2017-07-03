@@ -12,11 +12,11 @@ class Schnapsen
     ];
 
     protected $werte = [
-        'A' => 11,
-        'K' => 4,
-        'D' => 3,
-        'J' => 2,
-        10 =>  10,
+        ['bezeichnung' => 'A', 'wert' => 11],
+        ['bezeichnung' => 'K', 'wert'  => 4],
+        ['bezeichnung' => 'D', 'wert'  => 3],
+        ['bezeichnung' => 'J', 'wert'  => 2],
+        ['bezeichnung' => '10', 'wert'  =>  10],
     ];
 
     protected $genug = 66;
@@ -42,30 +42,36 @@ class Schnapsen
 
     public function auspacken()
     {
-        foreach ($this->farben as $farbe) {
-            foreach ($this->werte as $bezeichnung => $wert) {
-                $this->karten[] = [
+        $this->karten = collect($this->farben)->map(function ($farbe) {
+            return collect($this->werte)->map(function ($wert) use ($farbe) {
+                return [
                     'farbe' => $farbe,
-                    'wert' => $wert,
-                    'bezeichnung' => $farbe . $bezeichnung
+                    'wert' => $wert['wert'],
+                    'bezeichnung' => $farbe . $wert['bezeichnung'],
                 ];
-            }
-        }
+            });
+        })
+        ->flatten(1)
+        ->toArray();
+
         return $this;
     }
 
     public function mischen()
     {
-        shuffle($this->karten);
+        $this->karten = collect($this->karten)->shuffle()->toArray();
+
         return $this;
     }
 
     public function abheben()
     {
-        $cards = rand(1, count($this->karten));
-        $slice = array_slice($this->karten, 0, $cards);
-        $remainingCards = array_slice($this->karten, $cards - 1, count($this->karten) - $cards);
-        $cards = array_merge($remainingCards, $slice);
+        $numberOfCards = rand(1, count($this->karten));
+        $slice = collect($this->karten)->slice(0, $numberOfCards);
+        $remainingCards = collect($this->karten)->slice($numberOfCards - 1, count($this->karten) - $numberOfCards);
+
+        $this->karten = $remainingCards->merge($slice)->values()->toArray();
+
         return $this;
     }
 
